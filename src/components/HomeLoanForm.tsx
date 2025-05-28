@@ -32,6 +32,8 @@ export default function HomeLoanForm() {
     houseAge: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const validate = () => {
     const newErrors = {
       loanType: "",
@@ -83,13 +85,19 @@ export default function HomeLoanForm() {
     return valid;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      console.log("Form is valid:", formData);
-      //API call here later
+        setLoading(true);
+        console.log("Form is valid:", formData);
+
+        // Simulate API call delay for dev purposes
+        setTimeout(() => {
+        setLoading(false); 
+        alert("Temp Calc complete");
+        }, 3000);
     }
-  };
+    };
 
   return (
     <Box
@@ -236,18 +244,20 @@ export default function HomeLoanForm() {
       {/* Submit button with full width  couldnt implement from prior resources*/}
       <Box mt={8}>
         <Button
-          type="submit"
-          variant="solid"
-          colorScheme="red"
-          width="100%"
-          _hover={{
-            bg: "blue.600",
-            color: "black",
-            transform: "scale(1.10)",
-            transition: "all 0.2s ease-in-out",
-          }}
-        >
-          Calculate Loan
+            type="submit"
+            variant="solid"
+            colorScheme="red"
+            width="100%"
+            isLoading={loading}
+            loadingText="Calculating..."
+            _hover={{
+                bg: "blue.600",
+                color: "black",
+                transform: "scale(1.10)",
+                transition: "all 0.2s ease-in-out",
+            }}
+            >
+            Calculate Loan
         </Button>
       </Box>
     </Box>
