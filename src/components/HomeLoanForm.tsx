@@ -33,6 +33,8 @@ export default function HomeLoanForm() {
   });
 
   const [loading, setLoading] = useState(false);
+  //const [result, setResult] = useState<any>(null);
+
 
   const validate = () => {
     const newErrors = {
@@ -85,17 +87,57 @@ export default function HomeLoanForm() {
     return valid;
   };
 
-    const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validate()) {
-        setLoading(true);
-        console.log("Form is valid:", formData);
+  const formatLoanType = (type: string) => {
+  switch (type) {
+    case "fixed": return "Fixed Rate";
+    case "variable": return "Variable Rate";
+    case "interest-only": return "Interest Only";
+    default: return type;
+  }
+};
 
-        // Simulate API call delay for dev purposes
-        setTimeout(() => {
-        setLoading(false); 
-        alert("Temp Calc complete");
-        }, 3000);
+const formatCreditScore = (score: string) => {
+  switch (score) {
+    case "excellent": return "Excellent";
+    case "good": return "Good";
+    case "poor": return "Poor";
+    default: return score;
+  }
+};
+
+    const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    
+    setLoading(true);
+    try {
+        const response = await fetch("https://home-loan.matthayward.workers.dev/calculate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            loanType: formatLoanType(formData.loanType),
+            loanAmount: parseFloat(formData.loanAmount),
+            term: parseInt(formData.termYears),
+            creditScore: formatCreditScore(formData.creditScore),
+            houseAge: parseInt(formData.houseAge),
+        }),
+        });
+        
+        if (!response.ok) {
+        throw new Error("Failed to fetch loan calculation.");
+        }
+        // Parse the JSON response
+        const data = await response.json();
+        console.log("Loan Calculation Result:", data);
+        alert(`Monthly Payment: $${data.monthlyPayment.toFixed(2)}`);
+    } catch (error) {
+        console.error(error);
+        alert("An error occurred while calculating the loan.");
+    } finally {
+        setLoading(false);
     }
     };
 
@@ -116,6 +158,7 @@ export default function HomeLoanForm() {
         Home Loan Calculator
       </Heading>
 
+      {/*handles selection*/}  
       <Grid gap={4}>
         <GridItem>
           <FormControl isRequired>
