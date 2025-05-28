@@ -31,9 +31,27 @@ export default function HomeLoanForm() {
     creditScore: "",
     houseAge: "",
   });
+  
+    //loading state for async operations
+    type LoanBreakdown = {
+    loanAmount: number;
+    termMonths: number;
+    baseInterestRate: number;
+    adjustedInterestRate: number;
+    creditScoreMultiplier: number;
+    houseAgeMultiplier: number;
+    houseAgeCategory: string;
+    };
+    //result of loan calculation
+    type LoanResult = {
+    monthlyPayment: number;
+    totalPayment: number;
+    totalInterest: number;
+    breakdown: LoanBreakdown;
+    };
 
   const [loading, setLoading] = useState(false);
-  //const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<LoanResult | null>(null);
 
 
   const validate = () => {
@@ -132,7 +150,7 @@ const formatCreditScore = (score: string) => {
         // Parse the JSON response
         const data = await response.json();
         console.log("Loan Calculation Result:", data);
-        alert(`Monthly Payment: $${data.monthlyPayment.toFixed(2)}`);
+        setResult(data); // Store the result in state for further use or display
     } catch (error) {
         console.error(error);
         alert("An error occurred while calculating the loan.");
@@ -289,7 +307,7 @@ const formatCreditScore = (score: string) => {
         <Button
             type="submit"
             variant="solid"
-            colorScheme="red"
+            colorScheme="blue"
             width="100%"
             isLoading={loading}
             loadingText="Calculating..."
@@ -303,6 +321,25 @@ const formatCreditScore = (score: string) => {
             Calculate Loan
         </Button>
       </Box>
+      {result && (
+        <Box mt={10} p={6} borderWidth={1} borderRadius="md" boxShadow="md" bg="gray.50">
+            <Heading size="sm" mb={4}>Loan Results</Heading>
+            <Text><strong>Monthly Payment:</strong> ${result.monthlyPayment.toFixed(2)}</Text>
+            <Text><strong>Total Payment:</strong> ${result.totalPayment.toFixed(2)}</Text>
+            <Text><strong>Total Interest:</strong> ${result.totalInterest.toFixed(2)}</Text>
+
+            <Box mt={4}>
+            <Heading size="xs" mb={2}>Breakdown</Heading>
+            <Text><strong>Loan Amount:</strong> ${result.breakdown.loanAmount}</Text>
+            <Text><strong>Term (months):</strong> {result.breakdown.termMonths}</Text>
+            <Text><strong>Base Interest Rate:</strong> {result.breakdown.baseInterestRate}%</Text>
+            <Text><strong>Adjusted Interest Rate:</strong> {result.breakdown.adjustedInterestRate}%</Text>
+            <Text><strong>Credit Score Multiplier:</strong> {result.breakdown.creditScoreMultiplier}</Text>
+            <Text><strong>House Age Multiplier:</strong> {result.breakdown.houseAgeMultiplier}</Text>
+            <Text><strong>House Age Category:</strong> {result.breakdown.houseAgeCategory}</Text>
+            </Box>
+        </Box>
+        )}
     </Box>
   );
 }
